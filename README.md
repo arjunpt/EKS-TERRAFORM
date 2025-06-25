@@ -57,3 +57,17 @@ resource "aws_eks_cluster" "eks_cluster" {
     Name        = var.cluster_name
   }
 }
+
+```hcl
+
+🧠 Parameters:
+name: Human-readable name for the EKS cluster (var.cluster_name).
+
+count: Conditional creation of the cluster (creates it only if is_eks_cluster_enabled == true).
+
+role_arn: IAM role with EKS service permissions.
+
+version: EKS Kubernetes version (1.28, 1.29, etc.).
+
+🔁 Workflow:
+This sets up the control plane (managed by AWS). No EC2 instances run here—only control APIs.
