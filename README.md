@@ -88,6 +88,21 @@ access_config {
 authentication_mode = "CONFIG_MAP": Allows IAM-based access via aws-auth ConfigMap. There is AP
 bootstrap_cluster_creator_admin_permissions = true: The creator gets full admin access automatically.
 
+🔧 What It Does:
+authentication_mode = "CONFIG_MAP":
+
+Uses the traditional aws-auth ConfigMap.
+
+IAM roles/users are manually added to this config to gain cluster access.
+
+bootstrap_cluster_creator_admin_permissions = true:
+
+Grants full admin (system:masters) access to whoever creates the cluster.
+
+This is critical to avoid being locked out of the cluster post-creation.
+
+Without this, no IAM user or role would be able to access your cluster after it's created. This is your entry point for cluster control.
+
 
 ### ✅ ` vpc_config` 
 
@@ -127,7 +142,17 @@ Enables Kubernetes service accounts to assume IAM roles via OIDC → IAM Roles f
 🧠 Why:
 Secure way to give pods IAM permissions without attaching EC2 instance roles.
 
+🔧 What It Does:
+It registers EKS's OIDC identity provider with IAM.
 
+This allows your Kubernetes ServiceAccounts to assume IAM roles (instead of assigning them to EC2 instances).
+
+✅ Why It's Needed:
+Avoids giving full IAM permissions to EC2 nodes.
+
+Enables fine-grained IAM per-pod.
+
+Essential for production-ready, secure EKS.
 
 ### ✅ `aws_eks_addon` 
 
@@ -154,6 +179,18 @@ Using Terraform to manage EKS add-ons ensures you are version-controlling your i
 
 depends_on: Wait for worker nodes to be ready before applying add-ons.
 
+🔧 What It Does:
+Uses EKS API to install and manage core networking add-ons.
+
+Can automatically upgrade versions if you allow.
+
+✅ Why It's Needed:
+Without these, EKS will not have networking (CNI) or DNS resolution.
+
+You ensure your cluster is fully functional and follows best practices.
+
+
+
 ### ✅ `aws_eks_node_group` - ondemand_node
 
 ```hcl
@@ -179,6 +216,15 @@ labels: Used in pod scheduling via node selectors or affinities.
 
 update_config.max_unavailable: Controls how many nodes can go down during rolling update.
 
+📦 What They Are:
+Regular EC2 instances — reliable, not interruptible.
+
+Used for critical workloads that cannot be stopped.
+
+✅ Use For:
+Core services (e.g., DNS, logging agents)
+
+Workloads needing high availability (e.g., frontend apps, APIs)
 
 
 ### ✅ `aws_eks_node_group ` – spot_node
@@ -200,6 +246,23 @@ Best for batch jobs, stateless workloads, or cost savings.
 disk_size: Attached volume size (default is 20GB, here it’s 50GB).
 
 labels.lifecycle = "spot": Helps in workload scheduling via tolerations.
+
+📦 What They Are:
+EC2 instances with up to 90% cost savings, but can be terminated by AWS at any time.
+
+Used for non-critical or stateless workloads.
+
+✅ Use For:
+Batch jobs
+
+Test environments
+
+ML workloads, temporary processing
+
+Scalable, fault-tolerant apps
+Use case: GitHub Actions, Jenkins, or ArgoCD build runners deployed as pods.
+Use case: Web service with 80% of replicas on Spot, 20% on On-Demand.
+Use case: ETL jobs running on Spark or KubeFlow.
 
 
 
