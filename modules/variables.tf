@@ -118,3 +118,19 @@ variable "is_eks_nodegroup_role_enabled" {
   type        = bool
   default     = true
 }
+
+
+###for output
+variable "vpc_id" {
+  description = "ID of the VPC"
+  type        = string
+}
+
+variable "private_subnet_ids" {
+  description = "List of private subnet IDs"
+  type        = list(string)
+}
+variable "eks_cluster_security_group_id" {
+  description = "Security group ID for EKS cluster"
+  type        = string
+}
