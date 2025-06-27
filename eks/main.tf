@@ -17,6 +17,9 @@ module "eks" {
     endpoint_private_access       = var.endpoint_private_access
     endpoint_public_access        = var.endpoint_public_access
     addons = var.addons
+    vpc_id                        = module.vpc.vpc_id
+    private_subnet_ids            = module.vpc.private_subnet_ids
+    eks_cluster_security_group_id = module.vpc.eks_cluster_security_group_id
     env                   = var.env
 
   
