@@ -1,7 +1,7 @@
-resource "aws_eks_cluster" "" {
+resource "aws_eks_cluster" "eks" {
   name = var.cluster_name
   count = var.is_eks_cluster_enabled == true ? 1:0
-  role_arn = aws_iam_role.eks-cluster-role[count.index].arn
+  role_arn = aws_iam_role.eks_cluster_role[count.index].arn
   version  = var.cluster_version
 
 
@@ -13,10 +13,10 @@ resource "aws_eks_cluster" "" {
 
 
   vpc_config {
-    subnet_ids              = [aws_subnet.private_subnet[0].id, aws_subnet.private_subnet[1].id, aws_subnet.private_subnet[2].id]
+    subnet_ids              = var.private_subnet_ids
     endpoint_private_access = var.endpoint_private_access
     endpoint_public_access  = var.endpoint_public_access
-    security_group_ids      = [aws_security_group.eks_cluster_sg.id]
+    security_group_ids      = [var.eks_cluster_security_group_id]
   }
 
   tags = {
@@ -63,7 +63,7 @@ resource "aws_eks_node_group" "ondemand_node" {
     max_size     = var.max_capacity_on_demand
   }
 
- subnet_ids = [aws_subnet.private_subnet[0].id, aws_subnet.private_subnet[1].id, aws_subnet.private_subnet[2].id]
+ subnet_ids = var.private_subnet_ids
 
   instance_types = var.ondemand_instance_types
   capacity_type  = "ON_DEMAND"
@@ -94,7 +94,7 @@ resource "aws_eks_node_group" "spot_node" {
   }
 
 
-  subnet_ids = [aws_subnet.private_subnet[0].id, aws_subnet.private_subnet[1].id, aws_subnet.private_subnet[2].id]
+  subnet_ids = var.private_subnet_ids
 
   instance_types = var.spot_instance_types
   capacity_type  = "SPOT"
